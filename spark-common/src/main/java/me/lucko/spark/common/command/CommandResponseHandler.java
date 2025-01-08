@@ -36,7 +36,8 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextDecoration.BOLD;
 
 public class CommandResponseHandler {
-    /** The prefix used in all messages */
+
+    /** The prefix used in all messages "&8[&e&l⚡&8] &7" */
     private static final TextComponent PREFIX = text()
             .color(GRAY)
             .append(text("[", DARK_GRAY))

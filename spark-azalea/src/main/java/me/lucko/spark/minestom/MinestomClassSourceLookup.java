@@ -20,10 +20,10 @@
 
 package me.lucko.spark.minestom;
 
-import gg.airbrush.server.plugins.Plugin;
-import gg.airbrush.server.plugins.PluginClassLoader;
-import gg.airbrush.server.plugins.PluginManager;
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
+import team.azalea.plugins.Plugin;
+import team.azalea.plugins.PluginClassLoader;
+import team.azalea.plugins.PluginManager;
 
 import java.util.HashMap;
 import java.util.Map;

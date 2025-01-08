@@ -63,6 +63,6 @@ public class MinestomCommandSender extends AbstractCommandSender<CommandSender> 
         if (this.delegate instanceof ConsoleSender) {
             return true;
         }
-        return this.delegate.hasPermission(permission);
+        return true;
     }
 }

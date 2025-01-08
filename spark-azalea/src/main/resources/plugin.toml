@@ -1,0 +1,5 @@
+id = "spark"
+name = "Spark"
+description = "Port of Spark for Azalea"
+version = "0.1.0"
+mainClass = "team.azalea.spark.Spark"

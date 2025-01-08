@@ -1,4 +1,4 @@
-package gg.airbrush.spark
+package team.azalea.spark
 
 import me.lucko.spark.common.SparkPlatform
 import me.lucko.spark.minestom.MinestomCommandSender

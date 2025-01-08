@@ -59,6 +59,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
@@ -189,7 +190,6 @@ public class SamplerModule implements CommandModule {
         }
 
         boolean ignoreSleeping = arguments.boolFlag("ignore-sleeping");
-        boolean ignoreNative = arguments.boolFlag("ignore-native");
         boolean forceJavaSampler = arguments.boolFlag("force-java-sampler");
 
         Set<String> threads = arguments.stringFlag("thread");
@@ -238,7 +238,6 @@ public class SamplerModule implements CommandModule {
         }
         builder.samplingInterval(interval);
         builder.ignoreSleeping(ignoreSleeping);
-        builder.ignoreNative(ignoreNative);
         builder.forceJavaSampler(forceJavaSampler);
         builder.allocLiveOnly(allocLiveOnly);
         if (ticksOver != -1) {
@@ -277,8 +276,8 @@ public class SamplerModule implements CommandModule {
         // send message if profiling fails
         future.whenCompleteAsync((s, throwable) -> {
             if (throwable != null) {
-                resp.broadcastPrefixed(text("Profiler operation failed unexpectedly. Error: " + throwable.toString(), RED));
-                throwable.printStackTrace();
+                resp.broadcastPrefixed(text("Profiler operation failed unexpectedly. Error: " + throwable, RED));
+                platform.getPlugin().log(Level.SEVERE, "Profiler operation failed unexpectedly", throwable);
             }
         });
 
@@ -439,7 +438,7 @@ public class SamplerModule implements CommandModule {
                 platform.getActivityLog().addToLog(Activity.urlActivity(resp.senderData(), System.currentTimeMillis(), "Profiler", url));
             } catch (Exception e) {
                 resp.broadcastPrefixed(text("An error occurred whilst uploading the results. Attempting to save to disk instead.", RED));
-                e.printStackTrace();
+                platform.getPlugin().log(Level.WARNING, "Error whilst uploading profiler results", e);
                 saveToFile = true;
             }
         }
@@ -456,7 +455,7 @@ public class SamplerModule implements CommandModule {
                 platform.getActivityLog().addToLog(Activity.fileActivity(resp.senderData(), System.currentTimeMillis(), "Profiler", file.toString()));
             } catch (IOException e) {
                 resp.broadcastPrefixed(text("An error occurred whilst saving the data.", RED));
-                e.printStackTrace();
+                platform.getPlugin().log(Level.WARNING, "Error whilst saving profiler results", e);
             }
         }
     }
@@ -498,7 +497,7 @@ public class SamplerModule implements CommandModule {
             platform.getActivityLog().addToLog(Activity.urlActivity(resp.senderData(), System.currentTimeMillis(), "Profiler (live)", url));
         } catch (Exception e) {
             resp.replyPrefixed(text("An error occurred whilst opening the live profiler.", RED));
-            e.printStackTrace();
+            platform.getPlugin().log(Level.WARNING, "Error whilst opening live profiler", e);
         }
     }
 

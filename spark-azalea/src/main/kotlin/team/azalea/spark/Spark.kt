@@ -1,12 +1,9 @@
-package gg.airbrush.spark
+package team.azalea.spark
 
-import gg.airbrush.server.pluginManager
-import gg.airbrush.server.plugins.Plugin
 import me.lucko.spark.common.SparkPlatform
 import me.lucko.spark.common.SparkPlugin
 import me.lucko.spark.common.command.sender.CommandSender
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider
-import me.lucko.spark.common.monitor.tick.TickStatistics
 import me.lucko.spark.common.platform.PlatformInfo
 import me.lucko.spark.common.sampler.source.ClassSourceLookup
 import me.lucko.spark.common.sampler.source.SourceMetadata
@@ -20,6 +17,7 @@ import me.lucko.spark.minestom.MinestomTickHook
 import me.lucko.spark.minestom.MinestomTickReporter
 import net.minestom.server.MinecraftServer
 import net.minestom.server.timer.ExecutionType
+import team.azalea.plugins.Plugin
 import java.nio.file.Path
 import java.util.logging.Level
 import java.util.stream.Stream
@@ -63,6 +61,15 @@ class Spark : Plugin(), SparkPlugin {
         println("[Spark] [${level.name}] - $msg")
     }
 
+    override fun log(level: Level?, msg: String?, throwable: Throwable?) {
+        val logger = MinecraftServer.LOGGER
+        when (level) {
+            Level.SEVERE -> logger.error(msg, throwable)
+            Level.WARNING -> logger.warn(msg, throwable)
+            else -> logger.info(msg, throwable)
+        }
+    }
+
     override fun getPlatformInfo(): PlatformInfo = MinestomPlatformInfo()
 
     override fun createTickHook(): TickHook = MinestomTickHook()
@@ -71,7 +78,7 @@ class Spark : Plugin(), SparkPlugin {
 
     override fun createPlayerPingProvider(): PlayerPingProvider = MinestomPlayerPingProvider()
 
-    override fun createClassSourceLookup(): ClassSourceLookup = MinestomClassSourceLookup(pluginManager)
+    override fun createClassSourceLookup(): ClassSourceLookup = MinestomClassSourceLookup(pluginManager )
 
     override fun getKnownSources(): MutableCollection<SourceMetadata> {
         return SourceMetadata.gather(

@@ -37,6 +37,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.IntPredicate;
+import java.util.logging.Level;
 
 /**
  * A sampler implementation using async-profiler.
@@ -68,7 +69,7 @@ public class AsyncSampler extends AbstractSampler {
         super(platform, settings);
         this.sampleCollector = collector;
         this.profilerAccess = AsyncProfilerAccess.getInstance(platform);
-        this.dataAggregator = new AsyncDataAggregator(settings.threadGrouper());
+        this.dataAggregator = new AsyncDataAggregator(settings.threadGrouper(), settings.ignoreSleeping());
         this.scheduler = Executors.newSingleThreadScheduledExecutor(
                 new ThreadFactoryBuilder()
                         .setNameFormat("spark-async-sampler-worker-thread")
@@ -124,7 +125,7 @@ public class AsyncSampler extends AbstractSampler {
                     // stop the previous job
                     previousJob.stop();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    this.platform.getPlugin().log(Level.WARNING, "Failed to stop previous profiler job", e);
                 }
 
                 // start a new job
@@ -139,7 +140,7 @@ public class AsyncSampler extends AbstractSampler {
                 try {
                     this.windowStatisticsCollector.measureNow(previousJob.getWindow());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    this.platform.getPlugin().log(Level.WARNING, "Failed to measure window statistics", e);
                 }
 
                 // aggregate the output of the previous job
@@ -153,7 +154,7 @@ public class AsyncSampler extends AbstractSampler {
                 this.scheduler.execute(this::processWindowRotate);
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            this.platform.getPlugin().log(Level.WARNING, "Exception occurred while rotating profiler job", e);
         }
     }
 
@@ -168,8 +169,12 @@ public class AsyncSampler extends AbstractSampler {
         }
 
         this.scheduler.schedule(() -> {
-            stop(false);
-            this.future.complete(this);
+            try {
+                stop(false);
+                this.future.complete(this);
+            } catch (Exception e) {
+                this.future.completeExceptionally(e);
+            }
         }, delay, TimeUnit.MILLISECONDS);
     }
 
